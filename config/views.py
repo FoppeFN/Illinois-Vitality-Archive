@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 def home_page(request):
-    return render(request, "pages/home.html")
+    return render(request, "home_page.html")
 
 def search_birth_records(request):
     if request.htmx:
