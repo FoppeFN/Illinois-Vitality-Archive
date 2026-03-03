@@ -5,14 +5,19 @@
         <tr class="bg-forest-green text-white">
             <th class="border border-black p-4">Date of Death</th>
             <th class="border border-black p-4">First Name</th>
+            <th class="border border-black p-4">Middle Name</th>
             <th class="border border-black p-4">Last Name</th>
             <th class="border border-black p-4">County</th>
             <th class="border border-black p-4">Image</th>
         </tr>
         <tr>
             <td class="border border-black p-4">2000-01-01</td>
-            <td class="border border-black p-4">Doe</td>
-            <td class="border border-black p-4">John</td>
+            <td class="border border-black"><button hx-get="{% url 'record_details' %}" hx-target="#modal-container" hx-swap="innerHTML" 
+            class="text-left p-4 hover:underline w-full h-full">James</button></td>
+            <td class="border border-black"><button hx-get="{% url 'record_details' %}" hx-target="#modal-container" hx-swap="innerHTML" 
+            class="text-left p-4 hover:underline w-full h-full">Robert</button></td>
+            <td class="border border-black"><button hx-get="{% url 'record_details' %}" hx-target="#modal-container" hx-swap="innerHTML" 
+            class="text-left p-4 hover:underline w-full h-full">Smith</button></td>
             <td class="border border-black p-4">Madison</td>
             <td class="border border-black p-4">IMG.jpg</td>
         </tr>
