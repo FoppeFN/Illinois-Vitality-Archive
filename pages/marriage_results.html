@@ -5,20 +5,30 @@
         <tr class="bg-forest-green text-white">
             <th class="border border-black p-4">Date of Marriage</th>
             <th class="border border-black p-4">Groom's First Name</th>
+            <th class="border border-black p-4">Groom's Middle Name</th>
             <th class="border border-black p-4">Groom's Last Name</th>
             <th class="border border-black p-4">Bride's First Name</th>
+            <th class="border border-black p-4">Bride's Middle Name</th>
             <th class="border border-black p-4">Bride's Last Name</th>
             <th class="border border-black p-4">County</th>
             <th class="border border-black p-4">Image</th>
         </tr>
         <tr>
-            <td class="border border-black p-4">2000-01-01</td>
-            <td class="border border-black p-4">Johnson</td>
-            <td class="border border-black p-4">John</td>
-            <td class="border border-black p-4">Smith</td>
-            <td class="border border-black p-4">Jane</td>
-            <td class="border border-black p-4">Madison</td>
-            <td class="border border-black p-4">IMG.jpg</td>
+            <td class="border border-black p-4 whitespace-nowrap">2000-01-01</td>
+            <td class="border border-black whitespace-nowrap"><button hx-get="{% url 'record_details' %}" hx-target="#modal-container" hx-swap="innerHTML" 
+            class="text-left p-4 hover:underline w-full h-full">Adam</button></td>
+            <td class="border border-black whitespace-nowrap"><button hx-get="{% url 'record_details' %}" hx-target="#modal-container" hx-swap="innerHTML" 
+            class="text-left p-4 hover:underline w-full h-full">John</button></td>
+            <td class="border border-black whitespace-nowrap"><button hx-get="{% url 'record_details' %}" hx-target="#modal-container" hx-swap="innerHTML" 
+            class="text-left p-4 hover:underline w-full h-full">Dunn</button></td>
+            <td class="border border-black whitespace-nowrap"><button hx-get="{% url 'record_details' %}" hx-target="#modal-container" hx-swap="innerHTML" 
+            class="text-left p-4 hover:underline w-full h-full">Eve</button></td>
+            <td class="border border-black whitespace-nowrap"><button hx-get="{% url 'record_details' %}" hx-target="#modal-container" hx-swap="innerHTML" 
+            class="text-left p-4 hover:underline w-full h-full">Jane</button></td>
+            <td class="border border-black whitespace-nowrap"><button hx-get="{% url 'record_details' %}" hx-target="#modal-container" hx-swap="innerHTML" 
+            class="text-left p-4 hover:underline w-full h-full">Smith</button></td>
+            <td class="border border-black p-4 whitespace-nowrap">Madison</td>
+            <td class="border border-black p-4 whitespace-nowrap">IMG.jpg</td>
         </tr>
     </table>
 </div>

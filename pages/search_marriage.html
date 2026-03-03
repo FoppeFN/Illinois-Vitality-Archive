@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1 class="text-5xl font-bold text-center text-forest-green mb-12">
+    <h1 class="text-5xl font-bold text-center text-forest-green mb-6">
         Search Marriage Records
     </h1>
 
@@ -18,13 +18,13 @@
 </div>
 
 <form hx-get="{% url 'search_marriage_records' %}" hx-target="#search-results" hx-swap="innerHTML">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mb-6">
         <div>
             <label for="groom_last_name" class="block text-forest-green font-bold mb-2">
                 Groom's Last Name
             </label>
             <input type="text" id="groom_last_name" name="groom_last_name"
-                class="w-full border-2 border-gray-300 rounded-md p-3 focus:outline-none focus:border-forest-green transition">
+                class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green transition">
         </div>
 
         <div>
@@ -32,7 +32,7 @@
                 Bride's Last Name
             </label>
             <input type="text" id="bride_last_name" name="bride_last_name" 
-            class="w-full border-2 border-gray-300 rounded-md p-3 focus:outline-none focus:border-forest-green transition">
+            class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green transition">
         </div>
 
         <div>
@@ -40,15 +40,31 @@
                 Groom's First Name
             </label>
             <input type="text" id="groom_first_name" name="groom_first_name" 
-            class="w-full border-2 border-gray-300 rounded-md p-3 focus:outline-none focus:border-forest-green transition">
+            class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green transition">
         </div>
 
         <div>
             <label for="bride_first_name" class="block text-forest-green font-bold mb-2">
                 Bride's First Name
             </label>
-            <input type="text" id="bride_first_name" name="bride_first_name" 
-            class="w-full border-2 border-gray-300 rounded-md p-3 focus:outline-none focus:border-forest-green">
+            <input type="text" id="bride_First_name" name="bride_first_name" 
+            class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green transition">
+        </div>
+
+        <div>
+            <label for="groom_middle_name" class="block text-forest-green font-bold mb-2">
+                Groom's Middle Name
+            </label>
+            <input type="text" id="groom_middle_name" name="groom_middle_name" 
+            class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green transition">
+        </div>
+
+        <div>
+            <label for="bride_middle_name" class="block text-forest-green font-bold mb-2">
+                Bride's Middle Name
+            </label>
+            <input type="text" id="bride_middle_name" name="bride_middle_name" 
+            class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green">
         </div>
         
         <div>
@@ -56,7 +72,7 @@
                 Year of Marriage
             </label>
             <input type="text" id="marriage_year" name="marriage_year" 
-            class="w-full border-2 border-gray-300 rounded-md p-3 focus:outline-none focus:border-forest-green transition">
+            class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green transition">
         </div>
 
         <div>
@@ -64,7 +80,7 @@
                 County
             </label>
             <select id="county" name="county"
-            class="w-full bg-white border-2 border-gray-300 rounded-md p-3 focus:outline-none focus:border-forest-green transition">
+            class="w-full bg-white border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green transition">
                 <option value="">All</option>
                 <option value="adams">Adams</option>
                 <option value="alexander">Alexander</option>
