@@ -23,3 +23,6 @@ def search_marriage_records(request):
 
 def record_details(request):
     return render(request, 'record_details.html')
+
+def home_page(request):
+    return render(request, "home_page.html")

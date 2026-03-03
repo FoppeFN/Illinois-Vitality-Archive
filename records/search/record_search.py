@@ -1,5 +1,6 @@
 from records.models import Person, Birth, Death, Marriage, County, City
-from django.db.models import CharField, TextField
+from django.db.models import CharField, TextField, DateField
+from django.db import connection
 import re
 from django.db.models import Q
 
@@ -70,7 +71,7 @@ def birth_search(filters: dict, fuzzy: bool = False):
 
     # Person fields (JOIN)
     if fuzzy:
-        q &= _fuzzy_person_search(filters.get("fuzzy_name"))
+        q &= _fuzzy_person_search(filters.get("first_name"), filters.get("middle_name"), filters.get("last_name"))
     else:
         filters_person = _wild_clean(_get_person_filters(filters))
         for field, pattern in filters_person.items():
@@ -90,7 +91,7 @@ def birth_search(filters: dict, fuzzy: bool = False):
         s, e = _get_date_range(birth_date, variance)
         q &= Q(birth_date__year__gte=s, birth_date__year__lte=e)
 
-    return Birth.objects.filter(q)
+    return Birth.objects.filter(q).distinct()
 
 
 
@@ -107,7 +108,7 @@ def death_search(filters: dict, fuzzy: bool = False):
 
     # Person fields (JOIN)
     if fuzzy:
-        q &= _fuzzy_person_search(filters.get("fuzzy_name"))
+        q &= _fuzzy_person_search(filters.get("first_name"), filters.get("middle_name"), filters.get("last_name"))
     else:
         filters_person = _wild_clean(_get_person_filters(filters))
         for field, pattern in filters_person.items():
@@ -127,7 +128,7 @@ def death_search(filters: dict, fuzzy: bool = False):
         s, e = _get_date_range(death_date, variance)
         q &= Q(death_date__year__gte=s, death_date__year__lte=e)
 
-    return Death.objects.filter(q)
+    return Death.objects.filter(q).distinct()
 
 
 
@@ -158,8 +159,18 @@ def marriage_search(filters: dict, fuzzy1: bool = False, fuzzy2: bool = False):
 
     # spouse 1
     if fuzzy1:
-        q_s1_set1 &= _fuzzy_person_search(filters.get("fuzzy_spouse1"), "spouse1__")
-        q_s1_set2 &= _fuzzy_person_search(filters.get("fuzzy_spouse1"), "spouse1__")
+        q_s1_set1 &= _fuzzy_person_search(
+            filters_spouse1.get("first_name"),
+            filters_spouse1.get("middle_name"),
+            filters_spouse1.get("last_name"),
+            "spouse1__"
+        )
+        q_s1_set2 &= _fuzzy_person_search(
+            filters_spouse2.get("first_name"),
+            filters_spouse2.get("middle_name"),
+            filters_spouse2.get("last_name"),
+            "spouse1__"
+        )
     else:
         for field, pattern in filters_spouse1.items():
             q_s1_set1 &= Q(**{f"spouse1__{field}__iregex": pattern})
@@ -168,8 +179,18 @@ def marriage_search(filters: dict, fuzzy1: bool = False, fuzzy2: bool = False):
     
     # spouse 2
     if fuzzy2:
-        q_s2_set2 &= _fuzzy_person_search(filters.get("fuzzy_spouse2"), "spouse2__")
-        q_s2_set1 &= _fuzzy_person_search(filters.get("fuzzy_spouse2"), "spouse2__")
+        q_s2_set2 &= _fuzzy_person_search(
+            filters_spouse2.get("first_name"),
+            filters_spouse2.get("middle_name"),
+            filters_spouse2.get("last_name"),
+            "spouse2__"
+        )
+        q_s2_set1 &= _fuzzy_person_search(
+            filters_spouse1.get("first_name"),
+            filters_spouse1.get("middle_name"),
+            filters_spouse1.get("last_name"),
+            "spouse2__"
+        )
     else:
         for field, pattern in filters_spouse2.items():
             q_s2_set2 &= Q(**{f"spouse2__{field}__iregex": pattern})
@@ -187,15 +208,43 @@ def marriage_search(filters: dict, fuzzy1: bool = False, fuzzy2: bool = False):
         s, e = _get_date_range(marriage_date, variance)
         q &= Q(marriage_date__year__gte=s, marriage_date__year__lte=e)
 
-    return Marriage.objects.filter(q)
+    return Marriage.objects.filter(q).distinct()
 
-def _fuzzy_person_search(query: str, prefix: str = "person__"):
-    terms = query.strip().split()
+def _fuzzy_person_search(first_name: str, middle_name: str, last_name: str, prefix: str = "person__"):
+    with connection.cursor() as cursor:
+        cursor.execute("SET pg_trgm.similarity_threshold = 0.25;")
+
     q = Q()
-    for term in terms:
-        q &= (
-            Q(**{f"{prefix}first_name__trigram_similar": term}) |
-            Q(**{f"{prefix}middle_name__trigram_similar": term}) |
-            Q(**{f"{prefix}last_name__trigram_similar": term})
-        )
+
+    if first_name:
+        q &= Q(**{f"{prefix}first_name__trigram_similar": first_name})
+    if middle_name:
+        q &= Q(**{f"{prefix}middle_name__trigram_similar": middle_name})
+    if last_name:
+        q &= Q(**{f"{prefix}last_name__trigram_similar": last_name})
+
     return q
+
+def narrow_down(query: str, objects):
+    if not query:
+        return objects
+
+    model = objects.model
+    q = Q()
+
+    for field in model._meta.get_fields():
+
+        # Direct text fields
+        if isinstance(field, (CharField, TextField, DateField)):
+            q |= Q(**{f"{field.name}__icontains": query})
+
+        # ForeignKey relations (1 level deep)
+        if field.is_relation and field.many_to_one:
+            rel_model = field.related_model
+            for rel_field in rel_model._meta.get_fields():
+                if rel_field.concrete and isinstance(rel_field, (CharField, TextField)):
+                    q |= Q(**{
+                        f"{field.name}__{rel_field.name}__icontains": query
+                    })
+
+    return objects.filter(q).distinct()
