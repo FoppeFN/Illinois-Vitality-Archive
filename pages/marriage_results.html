@@ -4,12 +4,8 @@
     <table class="border-collapse table-auto">
         <tr class="bg-forest-green text-white">
             <th class="border border-black p-4">Date of Marriage</th>
-            <th class="border border-black p-4">Spouse 1's First Name</th>
-            <th class="border border-black p-4">Spouse 1's Middle Name</th>
-            <th class="border border-black p-4">Spouse 1's Last Name</th>
-            <th class="border border-black p-4">Spouse 2's First Name</th>
-            <th class="border border-black p-4">Spouse 2's Middle Name</th>
-            <th class="border border-black p-4">Spouse 2's Last Name</th>
+            <th class="border border-black p-4">Spouse 1 Name</th>
+            <th class="border border-black p-4">Spouse 2 Name</th>
             <th class="border border-black p-4">County</th>
             <th class="border border-black p-4">Image</th>
         </tr>
@@ -19,32 +15,15 @@
             <td class="border border-black whitespace-nowrap"><button 
                 hx-get="{% url 'record_details' record.spouse1.id %}" 
                 hx-target="#modal-container" hx-swap="innerHTML" 
-                class="text-left p-4 hover:underline w-full h-full">{{record.spouse1.first_name | default:"Unknown"}}
-            </button></td>
-            <td class="border border-black whitespace-nowrap"><button 
-                hx-get="{% url 'record_details' record.spouse1.id %}" 
-                hx-target="#modal-container" hx-swap="innerHTML" 
-                class="text-left p-4 hover:underline w-full h-full">{{record.spouse1.middle_name | default_if_none:""}}
-            </button></td>
-            <td class="border border-black whitespace-nowrap"><button 
-                hx-get="{% url 'record_details' record.spouse1.id %}" 
-                hx-target="#modal-container" hx-swap="innerHTML" 
-                class="text-left p-4 hover:underline w-full h-full">{{record.spouse1.last_name}}
-            </button></td>
+                class="text-left p-4 hover:underline w-full h-full">
+                {{record.spouse1.first_name}} {{record.spouse1.middle_name}} {{record.spouse1.last_name}}</button>
+            </td>
             <td class="border border-black whitespace-nowrap"><button 
                 hx-get="{% url 'record_details' record.spouse2.id %}" 
                 hx-target="#modal-container" hx-swap="innerHTML" 
-                class="text-left p-4 hover:underline w-full h-full">{{record.spouse2.first_name | default:"Unknown"}}
-            </button></td>
-            <td class="border border-black whitespace-nowrap"><button 
-                hx-get="{% url 'record_details' record.spouse2.id %}" 
-                hx-target="#modal-container" hx-swap="innerHTML" 
-                class="text-left p-4 hover:underline w-full h-full">{{record.spouse2.middle_name | default_if_none:""}}
-            </button></td>
-            <td class="border border-black whitespace-nowrap"><button 
-                hx-get="{% url 'record_details' record.spouse2.id %}" 
-                hx-target="#modal-container" hx-swap="innerHTML" 
-                class="text-left p-4 hover:underline w-full h-full">{{record.spouse2.last_name}}</button></td>
+                class="text-left p-4 hover:underline w-full h-full">
+                {{record.spouse2.first_name}} {{record.spouse2.middle_name}} {{record.spouse2.last_name}}</button>
+            </td>
             <td class="border border-black p-4 whitespace-nowrap">{{record.marriage_county | default:"N/A"}}</td>
             <td class="border border-black p-4 whitespace-nowrap">IMG.jpg</td>
         </tr>

@@ -85,9 +85,9 @@ class Person(models.Model):
 
     # BASIC ===========================================
     # name
-    last_name = models.CharField(max_length = 100, blank=True, null=True)
-    first_name = models.CharField(max_length = 100, blank=True, null=True)
-    middle_name = models.CharField(max_length = 100, blank=True, null=True)
+    last_name = models.CharField(max_length = 100, blank=True, default="")
+    first_name = models.CharField(max_length = 100, blank=True, default="Unknown")
+    middle_name = models.CharField(max_length = 100, blank=True, default="")
     
     # sex
     sex = models.CharField(
@@ -150,7 +150,6 @@ class Person(models.Model):
     
     def spouses(self):
         marriages = Marriage.objects.filter(models.Q(spouse1 = self) | models.Q(spouse2 = self))
-
         spouses = []
 
         for marriage in marriages:

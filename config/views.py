@@ -5,14 +5,16 @@ from records.models import Person, Birth, Death, County
 def search_birth_records(request):
     if request.htmx:
         filters = {}
+
         for key, val in request.GET.items():
             if val.strip():
                 filters[key] = val.strip()
 
         if 'birth_year' in filters:
             filters['birth_date'] = filters.pop('birth_year')
-        if 'county' in filters:
-            filters['county_name'] = filters.pop('county')
+
+        if filters.get('variance') == "exact":
+            filters['variance'] = 0
 
         res = birth_search(filters)
 
@@ -24,14 +26,16 @@ def search_birth_records(request):
 def search_death_records(request):
     if request.htmx:
         filters = {}
+
         for key, val in request.GET.items():
             if val.strip():
                 filters[key] = val.strip()
 
         if 'death_year' in filters:
             filters['death_date'] = filters.pop('death_year')
-        if 'county' in filters:
-            filters['county_name'] = filters.pop('county')
+
+        if filters.get('variance') == "exact":
+            filters['variance'] = 0
 
         res = death_search(filters)
 
@@ -43,6 +47,7 @@ def search_death_records(request):
 def search_marriage_records(request):
     if request.htmx:
         filters = {}
+
         for key, val in request.GET.items():
             if val.strip():
                 filters[key] = val.strip()
@@ -50,8 +55,8 @@ def search_marriage_records(request):
         if 'marriage_year' in filters:
             filters['marriage_date'] = filters.pop('marriage_year')
 
-        if 'county' in filters:
-            filters['county_name'] = filters.pop('county')
+        if filters.get('variance') == "exact":
+            filters['variance'] = 0
 
         res = marriage_search(filters)
 
