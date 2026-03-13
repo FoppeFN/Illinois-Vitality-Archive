@@ -1,0 +1,10 @@
+[flake8]
+exclude =
+    .git,
+    __pycache__,
+    .pytest_cache,
+    node_modules,
+    static/node_modules,
+    records/migrations,
+    db_extensions/migrations
+max-line-length = 100

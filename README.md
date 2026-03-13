@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Illinois Vital Records
 
 # First Time Docker Initialization
@@ -10,3 +11,6 @@ You should only have to run this command one time, we only need to use this comm
 
 
 In order to shut it down, you can use docker compose down, and to do a hard reset you would use docker compose down -v, ONLY USE THIS if we want to reset database or database is broken. 
+=======
+# Illinois Vitality Archive
+>>>>>>> origin/main

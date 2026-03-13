@@ -11,3 +11,4 @@ static/node_modules/
 .vscode/
 .DS_Store
 Thumbs.db
+family_tree.json
