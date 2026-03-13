@@ -39,8 +39,8 @@ class BirthRecordSearch(BaseRecordSearch):
         birth_fields = [f.name for f in Birth._meta.get_fields()
                  if f.concrete and f.name not in ["id", "person"]]
         
-        person_filters = {k: v for k, v in filters if k in person_fields}
-        birth_filters = {k: v for k, v in filters if k in birth_fields}
+        person_filters = {k: v for k, v in filters.items() if k in person_fields}
+        birth_filters = {k: v for k, v in filters.items() if k in birth_fields}
 
         q &= BaseRecordSearch._build_q(person_filters, "records_person", related_prefix="person__")
         q &= BaseRecordSearch._build_q(birth_filters, "records_birth")
@@ -53,7 +53,7 @@ class DeathRecordSearch(BaseRecordSearch):
     
     @staticmethod
     def search(filters: dict):
-        qs = Birth.objects.select_related("person")
+        qs = Death.objects.select_related("person")
         q = Q()
 
         person_fields = [f.name for f in Person._meta.get_fields() 
@@ -61,8 +61,8 @@ class DeathRecordSearch(BaseRecordSearch):
         death_fields = [f.name for f in Death._meta.get_fields()
                  if f.concrete and f.name not in ["id", "person"]]
         
-        person_filters = {k: v for k, v in filters if k in person_fields}
-        death_filters = {k: v for k, v in filters if k in death_fields}
+        person_filters = {k: v for k, v in filters.items() if k in person_fields}
+        death_filters = {k: v for k, v in filters.items() if k in death_fields}
 
         q &= BaseRecordSearch._build_q(person_filters, "records_person", related_prefix="person__")
         q &= BaseRecordSearch._build_q(death_filters, "records_death")

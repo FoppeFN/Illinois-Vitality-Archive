@@ -111,7 +111,9 @@ class Birth(models.Model):
     person = models.OneToOneField(
         Person,
         on_delete=models.CASCADE,
-        related_name="birth"
+        related_name="birth",
+        null="True",
+        blank="True"
     )
 
     birth_date = models.DateField(blank=True, null=True)
@@ -153,7 +155,9 @@ class Death(models.Model):
     person = models.OneToOneField(
         Person,
         on_delete=models.CASCADE,
-        related_name="death"
+        related_name="death",
+        null="True",
+        blank="True"
     )
 
     death_date = models.DateField(blank=True, null=True)
