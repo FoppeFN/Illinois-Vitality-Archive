@@ -1,6 +1,6 @@
 # Illinois Vital Records
 
-# First Time Docker Initialization
+## First Time Docker Initialization
 
 1. Create .env file (in discord)
 2. Run using command:  docker compose up --build
