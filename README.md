@@ -8,5 +8,3 @@
 
 * You should only have to run this command one time, we only need to use this command if we change our requirements or dockerfiles. In order to run it normally after building it the first time, just use docker compose up.
 * In order to shut it down, you can use docker compose down, and to do a hard reset you would use docker compose down -v, ONLY USE THIS if we want to reset database or database is broken. 
-=======
-# Illinois Vitality Archive

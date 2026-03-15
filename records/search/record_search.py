@@ -218,18 +218,8 @@ def get_marriage_by_person(person):
     
     marriage = Marriage.objects.filter(spouse2 = person)
 
-<<<<<<< HEAD
-        person_fields = [f.name for f in Person._meta.get_fields() 
-                 if f.concrete and f.name not in ["id", "mother", "father"]]
-        birth_fields = [f.name for f in Birth._meta.get_fields()
-                 if f.concrete and f.name not in ["id", "person"]]
-        
-        person_filters = {k: v for k, v in filters.items() if k in person_fields}
-        birth_filters = {k: v for k, v in filters.items() if k in birth_fields}
-=======
     if marriage:
         return marriage
->>>>>>> origin/main
 
 def _fuzzy_person_search(first_name: str, middle_name: str, last_name: str, prefix: str = "person__"):
     with connection.cursor() as cursor:
@@ -244,28 +234,11 @@ def _fuzzy_person_search(first_name: str, middle_name: str, last_name: str, pref
     if last_name:
         q &= Q(**{f"{prefix}last_name__trigram_similar": last_name})
 
-<<<<<<< HEAD
-class DeathRecordSearch(BaseRecordSearch):
-    
-    @staticmethod
-    def search(filters: dict):
-        qs = Death.objects.select_related("person")
-        q = Q()
-
-        person_fields = [f.name for f in Person._meta.get_fields() 
-                 if f.concrete and f.name not in ["id", "mother", "father"]]
-        death_fields = [f.name for f in Death._meta.get_fields()
-                 if f.concrete and f.name not in ["id", "person"]]
-        
-        person_filters = {k: v for k, v in filters.items() if k in person_fields}
-        death_filters = {k: v for k, v in filters.items() if k in death_fields}
-=======
     return q
 
 def narrow_down(query: str, objects):
     if not query:
         return objects
->>>>>>> origin/main
 
     model = objects.model
     q = Q()

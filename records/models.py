@@ -134,13 +134,28 @@ class Person(models.Model):
     
     # find siblings by obtaining all people with same parent as self
     def siblings(self, sibling_sex=None):
+    # Note: Current method returns a queryset if mother/father exists otherwise no explicit return
+    #       Python is returning none
+    #       The test asks for person.siblings().count()
+    #       siblings() should always return a queryset i.e. matching siblings when parents exists, Person.objects.none() when no parents available
+    #       Marquis -> "I changed the pattern below to try and reflect this so that you get matching siblings or an empty queryset"
+    #       Going to observe behavior
         if not self.mother and not self.father:
-            return None
+            return Person.objects.none()
+        
+        q = models.Q()
 
-        qs = Person.objects.filter(models.Q(mother=self.mother) | models.Q(father=self.father))
+        if self.mother:
+            q |= models.Q(mother=self.mother)
+        if self.father:
+            q |= models.Q(father=self.father)
+        
+        qs = Person.objects.filter(q).exclude(id=self.id).distinct()
+ 
         if sibling_sex:
             qs = qs.filter(sex=sibling_sex)
-        return qs.exclude(id=self.id)
+
+        return qs
     
     def brothers(self):
         return self.siblings(Sex.MALE)

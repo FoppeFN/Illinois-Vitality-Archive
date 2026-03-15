@@ -125,6 +125,8 @@ class FamilyStructureTestPopulatedDB(TestCase):
     def setUpTestData(cls):
         # Initialize the database tables
         call_command('init_db', verbosity=0)
+        # Generate the mock family tree JSON required by mock_populate
+        call_command('generate_family', verbosity=0)
         # Populate the database with mock data
         call_command('mock_populate', verbosity=0)
 
