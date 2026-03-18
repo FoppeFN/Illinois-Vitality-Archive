@@ -28,4 +28,6 @@ urlpatterns = [
     path('marriage_results/', views.search_marriage_records, name='marriage_results'),
     path('person/<str:person_id>/', views.record_details, name='record_details'),
     path('', views.home_page,  name='home_page'),
+    path('our-mission/', views.our_mission, name='our_mission'),
+    path('glossary/', views.glossary, name='glossary'),
 ]

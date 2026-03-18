@@ -78,3 +78,9 @@ def record_details(request, person_id):
 
 def home_page(request):
     return render(request, "home_page.html")
+
+def our_mission(request):
+    return render(request, "our_mission.html")
+
+def glossary(request):
+    return render(request, "glossary.html")
