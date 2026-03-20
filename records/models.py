@@ -37,7 +37,7 @@ class County(models.Model):
     )
 
     def __str__(self):
-        return f"{self.county_code}: {self.county_name}"
+        return f"{self.county_name}"
 
 
 # defines cities
@@ -61,7 +61,7 @@ class City(models.Model):
     )
 
     def __str__(self):
-        return f"{self.city_name} - {self.county}"
+        return f"{self.city_name}, {self.county} County"
 
 
 # Create your models here.
@@ -84,9 +84,9 @@ class Person(models.Model):
 
     # BASIC ===========================================
     # name
-    last_name = models.CharField(max_length = 100, blank=True, null=True)
-    first_name = models.CharField(max_length = 100, blank=True, null=True)
-    middle_name = models.CharField(max_length = 100, blank=True, null=True)
+    last_name = models.CharField(max_length = 100, blank=True, default="")
+    first_name = models.CharField(max_length = 100, blank=True, default="Unknown")
+    middle_name = models.CharField(max_length = 100, blank=True, default="")
     
     # sex
     sex = models.CharField(
@@ -146,7 +146,17 @@ class Person(models.Model):
     def sisters(self):
         return self.siblings(Sex.FEMALE)
     
+    def spouses(self):
+        marriages = Marriage.objects.filter(models.Q(spouse1 = self) | models.Q(spouse2 = self))
+        spouses = []
 
+        for marriage in marriages:
+            if marriage.spouse1 == self:
+                spouses.append(marriage.spouse2)
+            else:
+                spouses.append(marriage.spouse1)
+
+        return spouses
     
 
 

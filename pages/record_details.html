@@ -1,0 +1,154 @@
+<div class="fixed inset-0 z-50 size-auto flex items-center justify-center bg-black bg-opacity-50 p-4" role="dialog" 
+aria-modal="true">
+    <button onclick="document.getElementById('modal-container').innerHTML=''" 
+    class="absolute top-4 right-4 z-10 text-red-300 transition">
+        <svg class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    </button>
+    
+    <div class="relative bg-white w-full max-w-xl rounded-xl overflow-y-auto max-h-[90vh]">
+
+        <div class="p-8">
+            <h2 class="text-3xl font-bold text-forest-green mb-6 border-b-2 border-forest-green">Record Details</h2>
+
+            <div class="space-y-3 text-lg">
+                <div class="flex justify-between">
+                    <span class="font-bold">Name:</span>
+                    <span class="text-right">
+                        {{person.first_name}} {{person.middle_name | default_if_none:""}} {{person.last_name}}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-bold">Sex:</span>
+                    <span class="text-right">{{person.get_sex_display | default:"Unknown"}}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-bold">Birth Date:</span>
+                    <span class="text-right">{{birth.birth_date | default:"N/A"}}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-bold">Birth Place:</span>
+                    <span class="text-right">
+                        {% if birth %}
+                            {{birth.birth_city}}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-bold">Death Date:</span>
+                    <span class="text-right">{{death.death_date | default:"N/A"}}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-bold">Death Place:</span>
+                    <span class="text-right">
+                        {% if death %}
+                            {{death.death_city}}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-bold">Mother:</span>
+                    <span class="text-right">
+                        {% if person.mother %}
+                            <button hx-get="{% url 'record_details' person.mother.id %}" hx-target="#modal-container"
+                                class="hover:underline">
+                                {{person.mother.first_name}} {{person.mother.middle_name}} {{person.mother.last_name}}
+                            </button>
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-bold">Father:</span>
+                    <span class="text-right">
+                        {% if person.father %}
+                            <button hx-get="{% url 'record_details' person.father.id %}" hx-target="#modal-container"
+                                class="hover:underline">
+                                {{person.father.first_name}} {{person.father_middle_name}} {{person.father.last_name}}
+                            </button>
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-bold">Siblings:</span>
+                    <span class="text-right">
+                        {% for sibling in person.siblings %}
+                            <button hx-get="{% url 'record_details' sibling.id %}" hx-target="#modal-container" 
+                                class="hover:underline">
+                                {{sibling.first_name}} {{sibling.middle_name}} {{sibling.last_name}}
+                            </button>{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            N/A
+                        {% endfor %}
+                    </span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-bold">Spouses:</span>
+                    <span class="text-right">
+                        {% for spouse in person.spouses %}
+                            <button hx-get="{% url 'record_details' spouse.id %}" hx-target="#modal-container" 
+                                class="hover:underline">
+                                {{spouse.first_name}} {{spouse.middle_name}} {{spouse.last_name}}
+                            </button>{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            N/A
+                        {% endfor %}
+                    </span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-bold">Children:</span>
+                    <span class="text-right">
+                        {% for child in person.children %}
+                            <button hx-get="{% url 'record_details' child.id %}" hx-target="#modal-container"
+                                class="hover:underline">
+                                {{child.first_name}} {{child.middle_name}} {{child.last_name}}
+                            </button>{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            N/A
+                        {% endfor %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-50 p-8 border-t border-gray-300 rounded-b-xl">
+            <h3 class="text-xl font-bold text-forest-green mb-4">Comment</h3>
+
+            <form>
+                <div class="mb-4">
+                    <label for="commenter_name" class="font-bold mb-2">Name</label>
+                    <input type="text" id="commenter_name" name="commenter_name" placeholder="Your Name"
+                    class="w-full border border-gray-300 p-3">
+                </div>
+
+                <div class="mb-4">
+                    <label for="commenter_email" class="font-bold mb-2">Email</label>
+                    <input type="email" id="commenter_email" name="commenter_email" placeholder="Your Email"
+                    class="w-full border border-gray-300 p-3">
+                </div>
+
+                <div class="mb-6">
+                    <label for="comment_text" class="font-bold mb-2">
+                        Leave a comment with additional information about this record
+                    </label>
+                    <textarea id="comment_text" name="comment_text" rows="4" placeholder="Type your comment here..."
+                    class="w-full border border-gray-300 p-3"></textarea>
+                </div>
+
+                <div class="flex justify-center">
+                    <button type="submit" 
+                    class="bg-forest-green text-white px-8 py-3 rounded font-bold hover:bg-[#0d4a46] transition">
+                        Submit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
