@@ -288,7 +288,7 @@ def expand_from_cluster(cluster, depth, sp_depth):
     birth_seed = people[rand_child]["birth_date"]
 
     mom = make_person(sex="F", birth_seed=birth_seed, age_offset=old_offset)
-    dad = make_person(sex="M", birth_seed=birth_seed, age_offset=old_offset)
+    dad = make_person(sex="M", birth_seed=birth_seed, age_offset=old_offset, last=people[rand_child]["last"])
     marry(mom, dad)
 
     # Attach these parents to every child in the cluster

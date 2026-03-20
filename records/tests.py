@@ -504,3 +504,9 @@ class AddCommentTest(TestCase):
 
     def test_add_comment(self):
         add_comment(self.person, self.fields)
+
+class SingleParentTest(TestCase):
+
+    def setUp(self):
+        self.person = Person.objects.create(last_name="Dunn", first_name="Ian")
+        

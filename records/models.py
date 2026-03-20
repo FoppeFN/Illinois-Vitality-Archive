@@ -6,7 +6,6 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from datetime import datetime
 
-
 #####################################
 #          PERSON TABLES            #
 #####################################
@@ -301,6 +300,11 @@ class Marriage(models.Model):
         blank = True,
         null = True
     )
+
+    def spouse(self, person):
+        if person == self.spouse1: return self.spouse2
+        if person == self.spouse2: return self.spouse1
+        return None
 
     def __str__(self):
         return f"{self.spouse1} & {self.spouse2}: {self.marriage_date}"
