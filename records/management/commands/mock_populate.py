@@ -52,7 +52,23 @@ class Command(BaseCommand):
                 death_city=d_city
             )
 
+            person_map[pid] = person
+
+        for pid, pdata in people.items():
+            person = person_map[pid]
+
+            if pdata.get("mother"):
+                person.mother = person_map[pdata["mother"]]
+
+            if pdata.get("father"):
+                person.father = person_map[pdata["father"]]
+
+            person.save()
+
             if image_count < 100:
+                birth_obj = person.birth.first()
+                death_obj = person.death.first()
+
                 birth_img = generate_birth_certificate_image(person, birth_obj)
                 birth_obj.birth_record_image.save(
                     f"birth_{person.id}.png",
@@ -68,19 +84,6 @@ class Command(BaseCommand):
                 )
 
                 image_count += 1
-
-            person_map[pid] = person
-
-        for pid, pdata in people.items():
-            person = person_map[pid]
-
-            if pdata.get("mother"):
-                person.mother = person_map[pdata["mother"]]
-
-            if pdata.get("father"):
-                person.father = person_map[pdata["father"]]
-            
-            person.save()
         
         for marriage in marriages:
             
