@@ -14,7 +14,7 @@
 </div>
 
 <form hx-get="{% url 'search_death_records' %}" hx-target="#search-results" hx-swap="innerHTML">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mb-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mb-10">
         <div>
             <label for="last_name" class="block text-forest-green font-bold mb-2">
                 Last Name
@@ -74,6 +74,14 @@
             </label>
             <input type="text" id="middle_name" name="middle_name" 
             class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green transition">
+        </div>
+
+        <div>
+            <label for="fuzzy_search" class="block text-forest-green font-bold mb-2">
+                Fuzzy Search
+            </label>
+            <input type="checkbox" id="fuzzy_search" name="fuzzy_search" 
+            class="w-9 h-9">
         </div>
     </div>
 

@@ -2,6 +2,7 @@ import csv
 import io
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
+from django.core.paginator import Paginator
 from django.db.models import Q
 from records.search.record_search import birth_search, death_search, marriage_search
 from records.models import Person, Birth, Death, Marriage, County
@@ -20,9 +21,19 @@ def search_birth_records(request):
         if filters.get('variance') == "exact":
             filters['variance'] = 0
 
-        res = birth_search(filters)
+        is_fuzzy = bool(filters.pop('fuzzy_search', False))
+        res = birth_search(filters, fuzzy = is_fuzzy)
+        paginator = Paginator(res, 25)
+        page_num = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_num)
+        query_dict = request.GET.copy()
 
-        return render(request, 'birth_results.html', {'results': res})
+        if 'page' in query_dict:
+            del query_dict['page']
+        
+        curr_query_str = query_dict.urlencode()
+
+        return render(request, 'birth_results.html', {'page_obj': page_obj, 'curr_query_str': curr_query_str})
     else:
         counties = County.objects.all().order_by('county_name')
         return render(request, 'search_birth.html', {'counties': counties})
@@ -41,9 +52,19 @@ def search_death_records(request):
         if filters.get('variance') == "exact":
             filters['variance'] = 0
 
-        res = death_search(filters)
+        is_fuzzy = bool(filters.pop('fuzzy_search', False))
+        res = death_search(filters, fuzzy = is_fuzzy)
+        paginator = Paginator(res, 25)
+        page_num = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_num)
+        query_dict = request.GET.copy()
 
-        return render(request, 'death_results.html', {'results': res})
+        if 'page' in query_dict:
+            del query_dict['page']
+        
+        curr_query_str = query_dict.urlencode()
+
+        return render(request, 'death_results.html', {'page_obj': page_obj, 'curr_query_str': curr_query_str})
     else:
         counties = County.objects.all().order_by('county_name')
         return render(request, 'search_death.html', {'counties': counties})
@@ -62,9 +83,19 @@ def search_marriage_records(request):
         if filters.get('variance') == "exact":
             filters['variance'] = 0
 
-        res = marriage_search(filters)
+        is_fuzzy = bool(filters.pop('fuzzy_search', False))
+        res = marriage_search(filters, fuzzy = is_fuzzy)
+        paginator = Paginator(res, 25)
+        page_num = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_num)
+        query_dict = request.GET.copy()
 
-        return render(request, 'marriage_results.html', {'results': res})
+        if 'page' in query_dict:
+            del query_dict['page']
+        
+        curr_query_str = query_dict.urlencode()
+
+        return render(request, 'marriage_results.html', {'page_obj': page_obj, 'curr_query_str': curr_query_str})
     else:
         counties = County.objects.all().order_by('county_name')
         return render(request, 'search_marriage.html', {'counties': counties})
@@ -219,8 +250,8 @@ def export_pdf(request, person_id):
     return response
 
 
-def home_page(request):
-    return render(request, "home_page.html")
+def home(request):
+    return render(request, "home.html")
 
 def our_mission(request):
     return render(request, "our_mission.html")
