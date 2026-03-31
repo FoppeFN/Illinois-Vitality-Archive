@@ -11,7 +11,7 @@
             <th class="border border-black p-4">Certificates</th>
         </tr>
 
-        {% for record in results %}
+        {% for record in page_obj %}
         <tr>
             <td class="border border-black p-4">{{record.birth_date}}</td>
             <td class="border border-black"><button hx-get="{% url 'record_details' record.person.id %}" 
@@ -52,7 +52,36 @@
                 No birth records matched your search criteria.
             </td>
         </tr>
-
         {% endfor %}
     </table>
+
+    <div class="mt-6 flex justify-center items-center text-forest-green font-bold px-4">
+        <div>
+            {% if page_obj.has_previous %}
+            <button hx-get="{% url 'search_birth_records' %}?{{curr_query_str}}&page={{page_obj.previous_page_number}}"
+            hx-target="#search-results" 
+            class="mr-2 p-1 rounded bg-forest-green hover:bg-[#0d4a46] text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" 
+                stroke="currentColor" class="w-4 h-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+            </button>
+            {% endif %}
+        </div>
+
+        <p>Page {{page_obj.number}} of {{page_obj.paginator.num_pages}}</p>
+
+        <div>
+            {% if page_obj.has_next %}
+            <button hx-get="{% url 'search_birth_records' %}?{{curr_query_str}}&page={{page_obj.next_page_number}}"
+            hx-target="#search-results"
+            class="ml-2 p-1 rounded bg-forest-green text-white hover:bg-[#0d4a46]">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" 
+                stroke="currentColor" class="w-4 h-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5 15.75 12l-7.5 7.5" />
+                </svg>
+            </button>
+            {% endif %}
+        </div>
+    </div>
 </div>

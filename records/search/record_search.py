@@ -132,7 +132,7 @@ def death_search(filters: dict, fuzzy: bool = False):
 
 
 
-def marriage_search(filters: dict, fuzzy1: bool = False, fuzzy2: bool = False):
+def marriage_search(filters: dict, fuzzy: bool = False):
     filters_marriage = _wild_clean(_get_marriage_filters(filters))
     filters_spouse1, filters_spouse2 = _marriage_to_person_filters(filters)
     filters_spouse1 = _wild_clean(filters_spouse1)
@@ -158,7 +158,7 @@ def marriage_search(filters: dict, fuzzy1: bool = False, fuzzy2: bool = False):
     q_s2_set1 = Q()
 
     # spouse 1
-    if fuzzy1:
+    if fuzzy:
         q_s1_set1 &= _fuzzy_person_search(
             filters_spouse1.get("first_name"),
             filters_spouse1.get("middle_name"),
@@ -178,7 +178,7 @@ def marriage_search(filters: dict, fuzzy1: bool = False, fuzzy2: bool = False):
             q_s1_set2 &= Q(**{f"spouse1__{field}__iregex": pattern})
     
     # spouse 2
-    if fuzzy2:
+    if fuzzy:
         q_s2_set2 &= _fuzzy_person_search(
             filters_spouse2.get("first_name"),
             filters_spouse2.get("middle_name"),
@@ -223,7 +223,7 @@ def get_marriage_by_person(person):
 
 def _fuzzy_person_search(first_name: str, middle_name: str, last_name: str, prefix: str = "person__"):
     with connection.cursor() as cursor:
-        cursor.execute("SET pg_trgm.similarity_threshold = 0.25;")
+        cursor.execute("SET pg_trgm.similarity_threshold = .3;")
 
     q = Q()
 
