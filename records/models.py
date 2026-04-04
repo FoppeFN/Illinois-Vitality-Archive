@@ -4,12 +4,11 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
 from django.contrib.auth.models import User
-
+from datetime import datetime
 
 #####################################
 #          PERSON TABLES            #
 #####################################
-
 
 # defines binary sex choices
 class Sex(models.TextChoices):
@@ -136,7 +135,6 @@ class Person(models.Model):
     def siblings(self, sibling_sex=None):
         if not self.mother and not self.father:
             return None
-
         qs = Person.objects.filter(models.Q(mother=self.mother) | models.Q(father=self.father))
         if sibling_sex:
             qs = qs.filter(sex=sibling_sex)
@@ -313,6 +311,11 @@ class Marriage(models.Model):
         null = True
     )
 
+    def spouse(self, person):
+        if person == self.spouse1: return self.spouse2
+        if person == self.spouse2: return self.spouse1
+        return None
+
     def __str__(self):
         return f"{self.spouse1} & {self.spouse2}: {self.marriage_date}"
     
@@ -353,3 +356,8 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.person}: {self.creation_time}"
+
+    def save(self, *args, **kwargs):
+        if not self.creation_time:
+            self.creation_time = datetime.now()
+        super().save(*args, **kwargs)
