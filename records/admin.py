@@ -309,25 +309,53 @@ class CommentAdmin(admin.ModelAdmin):
     ]
 
     readonly_fields = ["show_content"]
-
     list_filter = ["seen_by_admin"]
-
-    list_display = ["id", "commenter_name", "commenter_email", "related_person", "seen"]
-    list_display_links = ["id", "commenter_name", "commenter_email"]
+    list_display = ["id_seen", "creation_time_seen", "commenter_name_seen", "commenter_email_seen", "related_person", "seen"]
 
     fieldsets = (
         ("Basic Info", {
-            "fields": ("commenter_name", "commenter_email", "person")
+            "fields": ("commenter_name", "commenter_email", "creation_time", "person")
         }),
         ("Content", {
             "fields": ("show_content", "seen_by_admin")
         }),
     )
 
+    def mark_seen(self, request, comment_id):
+        comment = get_object_or_404(Comment, pk=comment_id)
+        comment.seen_by_admin = True
+        comment.save()
+        return HttpResponse("")
+
+    def build_std_link(self, obj, hyperlink):
+        url = reverse("admin:mark_seen", args=[obj.id])
+        change_url = reverse("admin:records_comment_change", args=[obj.id])
+
+        return format_html(
+            '''
+            <a href="{}"
+            hx-post="{}"
+            hx-trigger="click"
+            hx-swap="none"
+            hx-on="click: event.preventDefault(); window.location.href='{}';">
+                {}
+            </a>
+            ''',
+            change_url,
+            url,
+            change_url,
+            hyperlink
+        )
+
+    def id_seen(self, obj): return self.build_std_link(obj, obj.id)
+    def commenter_name_seen(self, obj): return self.build_std_link(obj, obj.commenter_name)
+    def commenter_email_seen(self, obj): return self.build_std_link(obj, obj.commenter_email)
+    def creation_time_seen(self, obj):
+        return self.build_std_link(obj, obj.creation_time.strftime("%Y-%m-%d %H:%M:%S"))
+
     def related_person(self, obj):
         url = reverse("admin:records_person_change", args=[obj.person.id])
         return format_html('<a href="{}" style="color:{}">{}</a>', url, ext_color, obj.person)
-    
 
     def get_urls(self):
         urls = super().get_urls()
@@ -336,6 +364,11 @@ class CommentAdmin(admin.ModelAdmin):
                 "toggle-seen/<int:comment_id>/",
                 self.admin_site.admin_view(self.toggle_seen),
                 name="toggle_seen",
+            ),
+            path(
+                "mark-seen/<int:comment_id>/",
+                self.admin_site.admin_view(self.mark_seen),
+                name="mark_seen",
             ),
         ]
         return custom_urls + urls
@@ -408,6 +441,10 @@ class CommentAdmin(admin.ModelAdmin):
             obj.comment_content
         )
         
+    id_seen.short_description = "ID"
+    commenter_name_seen.short_description = "Commenter Name"
+    commenter_email_seen.short_description = "Commenter Email"
+    creation_time_seen.short_description = "Creation Time"
     related_person.short_description = "Related Person"
     seen.short_description = "Seen"
     show_content.short_description = "Comment Content"
