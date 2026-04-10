@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Home | IVA{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl text-center text-forest-green font-semibold mt-20">Welcome to the Illinois Vitality Archive!</h2>
+
+<div class="grid md:grid-cols-3 gap-6 mt-8">
+    <a href="{% url 'search_birth_records' %}" class="p-8 text-center bg-forest-green text-white rounded hover:bg-[#0d4a46]">
+        Birth Records
+    </a>
+
+    <a href="{% url 'search_death_records' %}" class="p-8 text-center bg-forest-green text-white rounded hover:bg-[#0d4a46]">
+        Death Records
+    </a>
+
+    <a href="{% url 'search_marriage_records' %}" class="p-8 text-center bg-forest-green text-white rounded hover:bg-[#0d4a46]">
+        Marriage Records
+    </a>
+</div>
+{% endblock %}

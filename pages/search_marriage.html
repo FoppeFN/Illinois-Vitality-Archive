@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="flex justify-center items-center mb-6 font-semibold">
+<div class="flex justify-center items-center mb-10 font-semibold">
     <a href="{% url 'search_birth_records' %}" class="text-forest-green px-6 py-3 hover:text-green-700 transition">
         BIRTH RECORDS
     </a>
@@ -14,7 +14,7 @@
 </div>
 
 <form hx-get="{% url 'search_marriage_records' %}" hx-target="#search-results" hx-swap="innerHTML">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-3 mb-10">
         <div>
             <label for="spouse1_last_name" class="block text-forest-green font-bold mb-2">
                 Spouse 1's Last Name
@@ -31,38 +31,6 @@
             class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green transition">
         </div>
 
-        <div>
-            <label for="spouse1_first_name" class="block text-forest-green font-bold mb-2">
-                Spouse 1's First Name
-            </label>
-            <input type="text" id="spouse1_first_name" name="spouse1_first_name" 
-            class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green transition">
-        </div>
-
-        <div>
-            <label for="spouse2_first_name" class="block text-forest-green font-bold mb-2">
-                Spouse 2's First Name
-            </label>
-            <input type="text" id="spouse2_first_name" name="spouse2_first_name" 
-            class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green transition">
-        </div>
-
-        <div>
-            <label for="spouse1_middle_name" class="block text-forest-green font-bold mb-2">
-                Spouse 1's Middle Name
-            </label>
-            <input type="text" id="spouse1_middle_name" name="spouse1_middle_name" 
-            class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green transition">
-        </div>
-
-        <div>
-            <label for="spouse2_middle_name" class="block text-forest-green font-bold mb-2">
-                Spouse 2's Middle Name
-            </label>
-            <input type="text" id="spouse2_middle_name" name="spouse2_middle_name" 
-            class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green">
-        </div>
-        
         <div class="grid grid-cols-2">
             <div>
                 <label for="marriage_year" class="block text-forest-green font-bold mb-2">
@@ -88,6 +56,22 @@
         </div>
 
         <div>
+            <label for="spouse1_first_name" class="block text-forest-green font-bold mb-2">
+                Spouse 1's First Name
+            </label>
+            <input type="text" id="spouse1_first_name" name="spouse1_first_name" 
+            class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green transition">
+        </div>
+
+        <div>
+            <label for="spouse2_first_name" class="block text-forest-green font-bold mb-2">
+                Spouse 2's First Name
+            </label>
+            <input type="text" id="spouse2_first_name" name="spouse2_first_name" 
+            class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green transition">
+        </div>
+
+        <div>
             <label for="county_name" class="block text-forest-green font-bold mb-2">
                 County
             </label>
@@ -98,6 +82,30 @@
                     <option value="{{c.county_name}}">{{c.county_name}}</option>
                 {% endfor %}
             </select>
+        </div>
+
+        <div>
+            <label for="spouse1_middle_name" class="block text-forest-green font-bold mb-2">
+                Spouse 1's Middle Name
+            </label>
+            <input type="text" id="spouse1_middle_name" name="spouse1_middle_name" 
+            class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green transition">
+        </div>
+
+        <div>
+            <label for="spouse2_middle_name" class="block text-forest-green font-bold mb-2">
+                Spouse 2's Middle Name
+            </label>
+            <input type="text" id="spouse2_middle_name" name="spouse2_middle_name" 
+            class="w-full border-2 border-gray-300 rounded-md p-1.5 focus:outline-none focus:border-forest-green">
+        </div>
+
+        <div>
+            <label for="fuzzy_search" class="block text-forest-green font-bold mb-2">
+                Fuzzy Search
+            </label>
+            <input type="checkbox" id="fuzzy_search" name="fuzzy_search" 
+            class="w-9 h-9">
         </div>
     </div>
 
