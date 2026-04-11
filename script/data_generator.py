@@ -7,8 +7,25 @@ RANDOM_SEED = 1337
 CURRENT_YEAR = 1990  # cap
 
 FIRST_NAMES_MALE = ["John", "William", "James", "Charles", "George", "Robert", "Edward"]
-FIRST_NAMES_FEMALE = ["Mary", "Elizabeth", "Anna", "Margaret", "Helen", "Ruth", "Florence"]
-LAST_NAMES = ["Smith", "Johnson", "Miller", "Brown", "Davis", "Wilson", "Anderson", "Taylor"]
+FIRST_NAMES_FEMALE = [
+    "Mary",
+    "Elizabeth",
+    "Anna",
+    "Margaret",
+    "Helen",
+    "Ruth",
+    "Florence",
+]
+LAST_NAMES = [
+    "Smith",
+    "Johnson",
+    "Miller",
+    "Brown",
+    "Davis",
+    "Wilson",
+    "Anderson",
+    "Taylor",
+]
 
 COUNTIES = [
     "Madison",
@@ -24,11 +41,11 @@ COUNTIES = [
 BASE_START_YEAR = 1880
 BASE_END_YEAR = 1950
 
-LIFESPAN_MIN = 0                # allow infant deaths
+LIFESPAN_MIN = 0  # allow infant deaths
 LIFESPAN_MAX = 100
 
-NUM_PEOPLE = 100                # how many people to generate     
-MARRIAGE_PROB = 0.4             # 40% of people get a marriage record
+NUM_PEOPLE = 100  # how many people to generate
+MARRIAGE_PROB = 0.4  # 40% of people get a marriage record
 
 MISSPELL_CHANCE = 0.05
 BLANK_FIELD_CHANCE = 0.03
@@ -37,10 +54,12 @@ BLANK_FIELD_CHANCE = 0.03
 def init_random():
     random.seed(RANDOM_SEED)
 
+
 def random_date_in_year(year: int) -> date:
     month = random.randint(1, 12)
     day = random.randint(1, 28)  # safe for all months
     return date(year, month, day)
+
 
 def chance_misspell(name: str, chance: float = MISSPELL_CHANCE) -> str:
     if not name or len(name) < 3:
@@ -52,20 +71,23 @@ def chance_misspell(name: str, chance: float = MISSPELL_CHANCE) -> str:
     chars[i], chars[i + 1] = chars[i + 1], chars[i]
     return "".join(chars)
 
+
 def chance_blank(value, chance: float = BLANK_FIELD_CHANCE):
     return "" if random.random() < chance else value
+
 
 def norm(value: str) -> str:
     if value is None:
         return ""
     return "".join(value.lower().split())
 
+
 def generate_person(person_id: int) -> dict:
     """
     Generate a 'person' object with birth & death info
     """
 
-    is_male = random.random() < 0.5     # "random boolean"
+    is_male = random.random() < 0.5  # "random boolean"
     gender = "M" if is_male else "F"
     first_name = random.choice(FIRST_NAMES_MALE if is_male else FIRST_NAMES_FEMALE)
     last_name = random.choice(LAST_NAMES)
@@ -77,13 +99,12 @@ def generate_person(person_id: int) -> dict:
     lifespan = random.randint(LIFESPAN_MIN, LIFESPAN_MAX)
     death_year = birth_year + lifespan
 
-    
-    if death_year > CURRENT_YEAR:       # ensure not in the future
-    # died sometime in the last 1–5 years before CURRENT_YEAR
+    if death_year > CURRENT_YEAR:  # ensure not in the future
+        # died sometime in the last 1–5 years before CURRENT_YEAR
         death_year = CURRENT_YEAR - random.randint(1, 5)
 
     if death_year < birth_year:
-        death_year = birth_year         # edge case
+        death_year = birth_year  # edge case
 
     death_date = random_date_in_year(death_year)
 
@@ -95,9 +116,10 @@ def generate_person(person_id: int) -> dict:
         "birth_date": birth_date,
         "death_date": death_date,
         "county_of_birth": county_of_birth,
-        "status": "Unmarried",                  # add marriages later
+        "status": "Unmarried",  # add marriages later
     }
     return person
+
 
 def make_birth_record_from_person(person: dict) -> dict:
     first = chance_misspell(person["first_name"])
@@ -147,9 +169,11 @@ def make_marriage_record(person1: dict, person2: dict, marriage_id: int) -> dict
     Pair two people and marry them, assuming they keep / share last name.
     """
     # choose a marriage year between both birth years + 16 and CURRENT_YEAR
-    min_year = max(person1["birth_date"].year + 16,
-                   person2["birth_date"].year + 16,
-                   BASE_START_YEAR)
+    min_year = max(
+        person1["birth_date"].year + 16,
+        person2["birth_date"].year + 16,
+        BASE_START_YEAR,
+    )
     max_year = min(CURRENT_YEAR, min_year + 50)
     m_year = random.randint(min_year, max_year)
     m_date = random_date_in_year(m_year)
@@ -176,6 +200,7 @@ def make_marriage_record(person1: dict, person2: dict, marriage_id: int) -> dict
         "last_name_norm": norm(last_name),
     }
 
+
 def generate_all_records():
     init_random()
 
@@ -201,6 +226,7 @@ def generate_all_records():
         marriage_id += 1
 
     return records
+
 
 def main():
     records = generate_all_records()

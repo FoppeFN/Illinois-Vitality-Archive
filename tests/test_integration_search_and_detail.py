@@ -1,7 +1,9 @@
-import pytest
 from datetime import date
+
+import pytest
 from django.urls import reverse
-from records.models import Birth, Death, Person, Sex, County, City
+
+from records.models import Birth, City, County, Death, Person, Sex
 
 
 @pytest.mark.django_db

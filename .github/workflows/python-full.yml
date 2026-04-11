@@ -53,9 +53,13 @@ jobs:
         run: |
           python manage.py migrate
 
-      - name: Run Flake8
+      - name: Run Ruff lint
         run: |
-          flake8 . || true
+          ruff check .
+
+      - name: Run Ruff format check
+        run: |
+          ruff format --check .
 
       - name: Run mypy
         run: |

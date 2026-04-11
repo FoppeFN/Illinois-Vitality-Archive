@@ -1,11 +1,12 @@
 import csv
 import io
+
 from django.core.paginator import Paginator
-from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
+
 from records.comment_utils import add_comment
-from records.models import Birth, County, Death, Marriage, Person
+from records.models import Birth, County, Death, Person
 from records.search.record_search import birth_search, death_search, marriage_search
 
 
@@ -122,11 +123,7 @@ def record_details(request, person_id):
     birth = Birth.objects.filter(person=person).first()
     death = Death.objects.filter(person=person).first()
 
-    context = {
-        "person": person,
-        "birth": birth,
-        "death": death,
-    }
+    context = {"person": person, "birth": birth, "death": death}
 
     return render(request, "record_details.html", context)
 
@@ -199,12 +196,32 @@ def export_csv(request, person_id):
 
     spouses = person.spouses()
     writer.writerow(
-        ["Spouses", ", ".join(f"{s.first_name} {s.last_name}" for s in spouses) if spouses else "N/A"]
+        [
+            "Spouses",
+            ", ".join(f"{s.first_name} {s.last_name}" for s in spouses)
+            if spouses
+            else "N/A",
+        ]
     )
 
     children = person.children()
     writer.writerow(
-        ["Children", ", ".join(f"{c.first_name} {c.last_name}" for c in children) if children else "N/A"]
+        [
+            "Children",
+            ", ".join(f"{c.first_name} {c.last_name}" for c in children)
+            if children
+            else "N/A",
+        ]
+    )
+
+    children = person.children()
+    writer.writerow(
+        [
+            "Children",
+            ", ".join(f"{c.firsst_name} {c.last_name}" for c in children)
+            if children
+            else "N/A",
+        ]
     )
 
     return response
@@ -244,6 +261,7 @@ def export_pdf(request, person_id):
         c.drawString(2.6 * inch, y, str(value) if value else "N/A")
         return y - line_h
 
+    # Header banner
     c.setFillColor(teal)
     c.rect(0, height - 1.1 * inch, width, 1.1 * inch, fill=1, stroke=0)
     c.setFillColor(colors.white)
@@ -254,12 +272,16 @@ def export_pdf(request, person_id):
 
     y = height - 1.4 * inch
 
+    # Personal info
     y = section_header("Personal Information", y)
-    full_name = f"{person.first_name} {person.middle_name or ''} {person.last_name}".strip()
+    full_name = (
+        f"{person.first_name} {person.middle_name or ''} {person.last_name}".strip()
+    )
     y = draw_field("Full Name:", full_name, y)
     y = draw_field("Sex:", person.get_sex_display() or "Unknown", y)
     y -= 0.1 * inch
 
+    # Birth
     if birth:
         y = section_header("Birth", y)
         y = draw_field("Date:", birth.birth_date, y)
@@ -267,6 +289,7 @@ def export_pdf(request, person_id):
         y = draw_field("County:", birth.birth_county, y)
         y -= 0.1 * inch
 
+    # Death
     if death:
         y = section_header("Death", y)
         y = draw_field("Date:", death.death_date, y)
@@ -275,6 +298,7 @@ def export_pdf(request, person_id):
         y = draw_field("County:", death.death_county, y)
         y -= 0.1 * inch
 
+    # Family
     y = section_header("Family", y)
     mother_str = (
         f"{person.mother.first_name} {person.mother.last_name}"
@@ -290,21 +314,28 @@ def export_pdf(request, person_id):
     y = draw_field("Father:", father_str, y)
 
     spouses = person.spouses()
-    spouses_str = ", ".join(f"{s.first_name} {s.last_name}" for s in spouses) if spouses else "N/A"
+    spouses_str = (
+        ", ".join(f"{s.first_name} {s.last_name}" for s in spouses)
+        if spouses
+        else "N/A"
+    )
     y = draw_field("Spouses:", spouses_str, y)
 
     children = person.children()
-    children_str = ", ".join(f"{ch.first_name} {ch.last_name}" for ch in children) if children else "N/A"
+    children_str = (
+        ", ".join(f"{ch.first_name} {ch.last_name}" for ch in children)
+        if children
+        else "N/A"
+    )
     y = draw_field("Children:", children_str, y)
 
+    # Footer
     c.setFillColor(teal)
     c.rect(0, 0, width, 0.45 * inch, fill=1, stroke=0)
     c.setFillColor(colors.white)
     c.setFont("Helvetica", 9)
     c.drawCentredString(
-        width / 2,
-        0.17 * inch,
-        "Illinois Vital Records — Genealogical Research System",
+        width / 2, 0.17 * inch, "Illinois Vital Records — Genealogical Research System"
     )
 
     c.showPage()
@@ -317,11 +348,14 @@ def export_pdf(request, person_id):
     )
     return response
 
+
 def home(request):
     return render(request, "home.html")
 
+
 def our_mission(request):
     return render(request, "our_mission.html")
+
 
 def glossary(request):
     return render(request, "glossary.html")
