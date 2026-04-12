@@ -259,3 +259,16 @@ def narrow_down(query: str, objects):
                     })
 
     return objects.filter(q).distinct()
+
+def get_marriage_by_person(person):
+    marriage = Marriage.objects.filter(spouse1=person)
+
+    if marriage:
+        return marriage
+    
+    marriage = Marriage.objects.filter(spouse2=person)
+
+    if marriage:
+        return marriage
+
+    return None

@@ -4,12 +4,11 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
 from django.contrib.auth.models import User
-
+from datetime import datetime
 
 #####################################
 #          PERSON TABLES            #
 #####################################
-
 
 # defines binary sex choices
 class Sex(models.TextChoices):
@@ -34,6 +33,7 @@ class County(models.Model):
     )
 
     county_name = models.CharField(
+        db_index=True,
         max_length=100
     )
 
@@ -58,6 +58,7 @@ class City(models.Model):
     )
 
     city_name = models.CharField(
+        db_index=True,
         max_length=100
     )
 
@@ -85,12 +86,13 @@ class Person(models.Model):
 
     # BASIC ===========================================
     # name
-    last_name = models.CharField(max_length = 100, blank=True, default="")
-    first_name = models.CharField(max_length = 100, blank=True, default="Unknown")
-    middle_name = models.CharField(max_length = 100, blank=True, default="")
+    last_name = models.CharField(db_index=True, max_length = 100, blank=True, default="")
+    first_name = models.CharField(db_index=True, max_length = 100, blank=True, default="Unknown")
+    middle_name = models.CharField(db_index=True, max_length = 100, blank=True, default="")
     
     # sex
     sex = models.CharField(
+        db_index=True,
         max_length = 1,
         choices = Sex.choices,
         blank=True,
@@ -136,7 +138,6 @@ class Person(models.Model):
     def siblings(self, sibling_sex=None):
         if not self.mother and not self.father:
             return None
-
         qs = Person.objects.filter(models.Q(mother=self.mother) | models.Q(father=self.father))
         if sibling_sex:
             qs = qs.filter(sex=sibling_sex)
@@ -181,7 +182,7 @@ class Birth(models.Model):
         related_name="birth"
     )
 
-    birth_date = models.DateField(blank=True, null=True)
+    birth_date = models.DateField(db_index=True, blank=True, null=True)
 
     birth_county = models.ForeignKey(
         County,
@@ -227,9 +228,10 @@ class Death(models.Model):
         related_name="death"
     )
 
-    death_date = models.DateField(blank=True, null=True)
+    death_date = models.DateField(db_index=True, blank=True, null=True)
 
     death_age = models.IntegerField(
+        db_index=True,
         blank=True,
         null=True,
         validators=[
@@ -290,7 +292,7 @@ class Marriage(models.Model):
         related_name = "marriages_as_spouse2"
     )
 
-    marriage_date = models.DateField(null=True, blank=True)
+    marriage_date = models.DateField(db_index=True, null=True, blank=True)
     marriage_county = models.ForeignKey(
         County,
         blank = True,
@@ -312,6 +314,11 @@ class Marriage(models.Model):
         blank = True,
         null = True
     )
+
+    def spouse(self, person):
+        if person == self.spouse1: return self.spouse2
+        if person == self.spouse2: return self.spouse1
+        return None
 
     def __str__(self):
         return f"{self.spouse1} & {self.spouse2}: {self.marriage_date}"
@@ -344,12 +351,20 @@ class Comment(models.Model):
     )
 
     # comment content
-    comment_content = models.CharField(max_length=2000)
+    comment_content = models.CharField(db_index=True, max_length=2000)
     creation_time = models.DateTimeField()
 
     # user optional content
-    commenter_name = models.CharField(max_length=100, blank=True, null=True)
-    commenter_email = models.CharField(max_length=100, blank=True, null=True)
+    commenter_name = models.CharField(db_index=True, max_length=100, blank=True, null=True)
+    commenter_email = models.CharField(db_index=True, max_length=100, blank=True, null=True)
+
+    # admin helper
+    seen_by_admin = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.person}: {self.creation_time}"
+
+    def save(self, *args, **kwargs):
+        if not self.creation_time:
+            self.creation_time = datetime.now()
+        super().save(*args, **kwargs)
