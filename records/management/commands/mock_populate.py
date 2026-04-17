@@ -93,7 +93,7 @@ class Command(BaseCommand):
                     person.father = person_map[pdata["father"]]
 
                 person.save()
-                
+
                 if image_count < max_images:
                     birth_obj = person.birth.first()
                     death_obj = person.death.first()
