@@ -415,6 +415,12 @@ Follow the [data generation guide](docs/data_gen_guide.md) to prepare the databa
 
 ---
 
+## Other Information
+
+Other useful information can be found in the [docs/](docs/) folder.
+
+---
+
 ## Authors
 
 - Sponsor: Mera Kachgal `mkachgal1@proton.me`
