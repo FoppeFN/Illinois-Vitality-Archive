@@ -1,3 +1,6 @@
+import os
+
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from records.image_utils import (
@@ -10,104 +13,127 @@ from records.utils import load_mock_data
 
 
 class Command(BaseCommand):
+    help = "Load mock genealogy data into the database"
+
     def add_arguments(self, parser):
         parser.add_argument(
             "--test-input",
             action="store_true",
-            help="Use test input file and disable image generation",
+            help="Use test input file and redirect image output",
         )
-
-    help = "Load mock genealogy data into the database"
 
     def handle(self, *args, **options):
-        _, people, marriages = load_mock_data(options.get("test_input"))
+        test_mode = options.get("test_input", False)
 
-        person_map = {}
-        image_count = 0
+        # Redirect media output in test mode
+        original_media_root = settings.MEDIA_ROOT
 
-        for pid, pdata in people.items():
-            if pdata["sex"] == "M":
-                sex = Sex.MALE
-            elif pdata["sex"] == "F":
-                sex = Sex.FEMALE
+        if test_mode:
+            settings.MEDIA_ROOT = os.path.join(settings.BASE_DIR, "test_media")
+            os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+
+        try:
+            _, people, marriages = load_mock_data(test_mode)
+
+            person_map = {}
+            image_count = 0
+
+            # --- Create people + related records ---
+            for pid, pdata in people.items():
+                if pdata["sex"] == "M":
+                    sex = Sex.MALE
+                elif pdata["sex"] == "F":
+                    sex = Sex.FEMALE
+                else:
+                    sex = Sex.UNKNOWN
+
+                person = Person.objects.create(
+                    first_name=pdata["first"],
+                    middle_name=pdata["middle"],
+                    last_name=pdata["last"],
+                    sex=sex,
+                )
+
+                b_county = County.objects.get(county_code=pdata["birth_county_code"])
+                b_city = City.objects.get(county=b_county, city_name=pdata["birth_city"])
+
+                d_county = County.objects.get(county_code=pdata["death_county_code"])
+                d_city = City.objects.get(county=d_county, city_name=pdata["death_city"])
+
+                Birth.objects.create(
+                    person=person,
+                    birth_date=pdata["birth_date"],
+                    birth_county=b_county,
+                    birth_city=b_city,
+                )
+
+                Death.objects.create(
+                    person=person,
+                    death_date=pdata["death_date"],
+                    death_age=pdata["age"],
+                    death_county=d_county,
+                    death_city=d_city,
+                )
+
+                person_map[pid] = person
+
+            if test_mode:
+                max_images = 1
             else:
-                sex = Sex.UNKNOWN
+                max_images = 100
 
-            person = Person.objects.create(
-                first_name=pdata["first"],
-                middle_name=pdata["middle"],
-                last_name=pdata["last"],
-                sex=sex,
-            )
+            # --- Set family relations + generate images ---
+            for pid, pdata in people.items():
+                person = person_map[pid]
 
-            b_county = County.objects.get(county_code=pdata["birth_county_code"])
-            b_city = City.objects.get(county=b_county, city_name=pdata["birth_city"])
+                if pdata.get("mother"):
+                    person.mother = person_map[pdata["mother"]]
 
-            d_county = County.objects.get(county_code=pdata["death_county_code"])
-            d_city = City.objects.get(county=d_county, city_name=pdata["death_city"])
+                if pdata.get("father"):
+                    person.father = person_map[pdata["father"]]
 
-            birth_obj = Birth.objects.create(
-                person=person,
-                birth_date=pdata["birth_date"],
-                birth_county=b_county,
-                birth_city=b_city,
-            )
+                person.save()
+                
+                if image_count < max_images:
+                    birth_obj = person.birth.first()
+                    death_obj = person.death.first()
 
-            death_obj = Death.objects.create(
-                person=person,
-                death_date=pdata["death_date"],
-                death_age=pdata["age"],
-                death_county=d_county,
-                death_city=d_city,
-            )
+                    birth_img = generate_birth_certificate_image(person, birth_obj)
+                    birth_obj.birth_record_image.save(
+                        f"birth_{person.id}.png",
+                        image_to_content_file(birth_img, f"birth_{person.id}.png"),
+                        save=True,
+                    )
 
-            person_map[pid] = person
+                    death_img = generate_death_certificate_image(person, death_obj)
+                    death_obj.death_record_image.save(
+                        f"death_{person.id}.png",
+                        image_to_content_file(death_img, f"death_{person.id}.png"),
+                        save=True,
+                    )
 
-        for pid, pdata in people.items():
-            person = person_map[pid]
+                    image_count += 1
 
-            if pdata.get("mother"):
-                person.mother = person_map[pdata["mother"]]
-
-            if pdata.get("father"):
-                person.father = person_map[pdata["father"]]
-
-            person.save()
-
-            if image_count < 100 and not options.get("test_input"):
-                birth_obj = person.birth.first()
-                death_obj = person.death.first()
-
-                birth_img = generate_birth_certificate_image(person, birth_obj)
-                birth_obj.birth_record_image.save(
-                    f"birth_{person.id}.png",
-                    image_to_content_file(birth_img, f"birth_{person.id}.png"),
-                    save=True,
+            # --- Marriages ---
+            for marriage in marriages:
+                m_county = County.objects.get(county_code=marriage["marriage_county"][0])
+                m_city = City.objects.get(
+                    county=m_county,
+                    city_name=marriage["marriage_city"]
                 )
 
-                death_img = generate_death_certificate_image(person, death_obj)
-                death_obj.death_record_image.save(
-                    f"death_{person.id}.png",
-                    image_to_content_file(death_img, f"death_{person.id}.png"),
-                    save=True,
+                Marriage.objects.create(
+                    spouse1=person_map[marriage["spouse1"]],
+                    spouse2=person_map[marriage["spouse2"]],
+                    marriage_date=marriage["marriage_date"],
+                    marriage_county=m_county,
+                    marriage_city=m_city,
                 )
 
-                image_count += 1
-
-        for marriage in marriages:
-            m_county = County.objects.get(county_code=marriage["marriage_county"][0])
-            m_city = City.objects.get(
-                county=m_county, city_name=marriage["marriage_city"]
+            self.stdout.write(
+                self.style.SUCCESS("Database populated with mock data successfully")
             )
 
-            Marriage.objects.create(
-                spouse1=person_map[marriage["spouse1"]],
-                spouse2=person_map[marriage["spouse2"]],
-                marriage_date=marriage["marriage_date"],
-                marriage_county=m_county,
-                marriage_city=m_city,
-            )
-
-        self.stdout.write(
-            self.style.SUCCESS("Database populated with mock data successfully")
-        )
+        finally:
+            # Always restore original media root
+            settings.MEDIA_ROOT = original_media_root
