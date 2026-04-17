@@ -121,7 +121,7 @@ Custom wildcard support:
 Examples:
 
 ```
-Sm%th → Smith, Smyth
+S%th → Smith, South
 J_hn → John, Juhn
 ```
 
