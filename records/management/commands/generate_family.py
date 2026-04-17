@@ -23,8 +23,8 @@ MAX_CHILDREN = 10
 
 
 
-FTDL = 6                   # Family Tree Depth Limit
-SPDL = 3                   # Sibling-Partner Depth Limit
+FTDL = 8                   # Family Tree Depth Limit
+SPDL = 6                   # Sibling-Partner Depth Limit
 
 
 # -----------------------------
