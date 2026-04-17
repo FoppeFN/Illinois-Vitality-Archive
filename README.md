@@ -415,6 +415,22 @@ Follow the [data generation guide](docs/data_gen_guide.md) to prepare the databa
 
 ---
 
+## Continuous Integration
+
+This project uses GitHub Actions to enforce automated quality checks on every push and pull request to the `main` branch.
+
+### Quality Gates
+
+The pipeline performs the following checks:
+
+- Linting and formatting with ruff
+- Static type checking with mypy (non-blocking)
+- Security analysis with bandit (non-blocking)
+- Testing with coverage using pytest + coverage
+    - Minimum coverage threshold: 50%
+
+---
+
 ## Other Information
 
 Other useful information can be found in the [docs/](docs/) folder.
