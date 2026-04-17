@@ -371,26 +371,57 @@ Spouse ordering is enforced to prevent duplicate entries for the same pair.
 
 ---
 
-## Setup (Optional)
+## Setup
+
+### Clone the Project Locally
 
 ```
-git clone <repo>
+git clone https://github.com/FoppeFN/Illinois-Vitality-Archive/tree/main
 cd project
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py runserver
 ```
 
+### Create Custom Environment File
+
+Inside the project directory, create a file called `.env` containing the following:
+
+```
+DJANGO_SUPERUSER_PASSWORD=<admin-password>
+DJANGO_SUPERUSER_USERNAME=<admin-username>
+DJANGO_SUPERUSER_EMAIL=IllinoisVitalityArchive@gmail.com
+POSTGRES_DB=IIVRDAPPDB
+POSTGRES_USER=IIVRDUSER
+POSTGRES_PASSWORD=IIVRDPASSWORDSECRET
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+DJANGO_SECRET_KEY=IIVRDSENIORDESIGN
+DJANGO_DEBUG=1
+```
+
+### Build the Docker Environment
+
+```
+docker compose up --build
+```
+
+### Validate and Use
+
+- Navigate to `http://localhost:8000/` in your web browser.
+- If you see the site, you have set up the environment properly.
+- To view the admin page, visit `http://localhost:8000/admin/` and use the username/password [you specified](#create-custom-environment-file) in `.env`.
+
+### Populating the Database
+
+Follow the [data generation guide](#docs/data_gen_guide.md) to fill the database with mock data.
+
 ---
 
-## License
+## Authors
 
-*(Add your license here if applicable)*
-
----
-
-## Author
-
-*(Your name or GitHub profile)*
+- Sponsor: Mera Kachgal `mkachgal1@proton.me`
+- Team:
+    - Zachariah Brincken
+    - Ian Dunn
+    - Nicholas Foppe
+    - Marquis Pritchett
 
 ---
