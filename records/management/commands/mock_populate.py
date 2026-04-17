@@ -52,17 +52,13 @@ class Command(BaseCommand):
                     sex=sex,
                 )
 
-                b_county = County.objects.get(
-                    county_code=pdata["birth_county_code"]
-                )
+                b_county = County.objects.get(county_code=pdata["birth_county_code"])
                 b_city = City.objects.get(
                     county=b_county,
                     city_name=pdata["birth_city"],
                 )
 
-                d_county = County.objects.get(
-                    county_code=pdata["death_county_code"]
-                )
+                d_county = County.objects.get(county_code=pdata["death_county_code"])
                 d_city = City.objects.get(
                     county=d_county,
                     city_name=pdata["death_city"],
@@ -105,20 +101,14 @@ class Command(BaseCommand):
                     birth_img = generate_birth_certificate_image(person, birth_obj)
                     birth_obj.birth_record_image.save(
                         f"birth_{person.id}.png",
-                        image_to_content_file(
-                            birth_img, f"birth_{person.id}.png"
-                        ),
+                        image_to_content_file(birth_img, f"birth_{person.id}.png"),
                         save=True,
                     )
 
-                    death_img = generate_death_certificate_image(
-                        person, death_obj
-                    )
+                    death_img = generate_death_certificate_image(person, death_obj)
                     death_obj.death_record_image.save(
                         f"death_{person.id}.png",
-                        image_to_content_file(
-                            death_img, f"death_{person.id}.png"
-                        ),
+                        image_to_content_file(death_img, f"death_{person.id}.png"),
                         save=True,
                     )
 
@@ -142,9 +132,7 @@ class Command(BaseCommand):
                 )
 
             self.stdout.write(
-                self.style.SUCCESS(
-                    "Database populated with mock data successfully"
-                )
+                self.style.SUCCESS("Database populated with mock data successfully")
             )
 
         finally:
