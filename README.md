@@ -160,15 +160,6 @@ Variance: 5
 
 ---
 
-### 5. Post-query Narrowing
-
-Additional filtering using `icontains` across:
-
-* Direct model fields
-* Related fields (one level deep)
-
----
-
 ## Mock Data Generation
 
 The archive is populated using a custom procedural generation system designed to simulate realistic genealogical structures and demographic patterns.
@@ -292,7 +283,7 @@ The generator loosely reflects early 20th-century patterns:
 Users can search using:
 
 * Name (first, middle, last)
-* Location (county, city)
+* Location (county)
 * Dates (with optional variance)
 * Wildcards or fuzzy matching
 
@@ -360,15 +351,6 @@ PostgreSQL GIN indexes with trigram operators improve fuzzy search performance.
 ### Marriage Normalization
 
 Spouse ordering is enforced to prevent duplicate entries for the same pair.
-
----
-
-## Future Improvements
-
-* Add public visibility controls for comments
-* Expand search to include additional record types
-* Introduce data export functionality
-* Improve frontend visualization of family trees
 
 ---
 
