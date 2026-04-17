@@ -411,7 +411,7 @@ docker compose up --build
 
 ### Populating the Database
 
-Follow the [data generation guide](#docs/data_gen_guide.md) to prepare the database to be populated.
+Follow the [data generation guide](docs/data_gen_guide.md) to prepare the database to be populated.
 
 ---
 
