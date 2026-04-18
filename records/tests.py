@@ -1,11 +1,11 @@
 from datetime import date
 
 from django.core.management import call_command
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from records.comment_utils import add_comment
-from records.models import Person, Birth, Death, Marriage, County, City, Comment, Sex
+from records.models import Birth, City, Comment, County, Death, Marriage, Person, Sex
 from records.search.record_search import (
     birth_search,
     death_search,
@@ -549,8 +549,6 @@ class PersonAdminLinkTests(TestCase):
         )
 
     def test_view_links_generate_urls(self):
-        url = reverse("admin:records_person_change", args=[self.person.id])
-
         birth_url = (
             reverse("admin:records_birth_changelist")
             + f"?person__id__exact={self.person.id}"
