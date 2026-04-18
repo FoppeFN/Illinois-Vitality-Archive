@@ -360,7 +360,7 @@ Spouse ordering is enforced to prevent duplicate entries for the same pair.
 
 ```
 git clone https://github.com/FoppeFN/Illinois-Vitality-Archive.git
-cd project
+cd Illinois-Vitality-Archive
 ```
 
 ### Create Custom Environment File
