@@ -1,10 +1,11 @@
 from datetime import date
 
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, Client
+from django.urls import reverse
 
 from records.comment_utils import add_comment
-from records.models import Birth, City, County, Death, Marriage, Person, Sex
+from records.models import Person, Birth, Death, Marriage, County, City, Comment, Sex
 from records.search.record_search import (
     birth_search,
     death_search,
@@ -534,20 +535,314 @@ class NarrowDownTest(TestCase):
         self.assertEqual(len(ids), len(set(ids)))
 
 
-class AddCommentTest(TestCase):
-    def setUp(self):
-        self.person = Person.objects.create(last_name="Smith", first_name="John")
-
-        self.fields = {
-            "comment_content": "test",
-            "commenter_name": "Zack",
-            "commenter_email": "zackbrincken@gmail.com",
-        }
-
-    def test_add_comment(self):
-        add_comment(self.person, self.fields)
-
-
 class SingleParentTest(TestCase):
     def setUp(self):
         self.person = Person.objects.create(last_name="Dunn", first_name="Ian")
+
+
+class PersonAdminLinkTests(TestCase):
+    def setUp(self):
+        self.person = Person.objects.create(
+            first_name="John",
+            last_name="Smith",
+            sex=Sex.MALE,
+        )
+
+    def test_view_links_generate_urls(self):
+        url = reverse("admin:records_person_change", args=[self.person.id])
+
+        birth_url = (
+            reverse("admin:records_birth_changelist")
+            + f"?person__id__exact={self.person.id}"
+        )
+        death_url = (
+            reverse("admin:records_death_changelist")
+            + f"?person__id__exact={self.person.id}"
+        )
+        marriage_url = reverse("admin:records_marriage_changelist")
+
+        self.assertIn(str(self.person.id), birth_url)
+        self.assertIn(str(self.person.id), death_url)
+        self.assertTrue(marriage_url.endswith("/"))
+
+
+class BirthDeathAdminTests(TestCase):
+    def setUp(self):
+        self.county = County.objects.create(county_code=1, county_name="TestCounty")
+        self.city = City.objects.create(county=self.county, city_name="TestCity")
+
+        self.person = Person.objects.create(first_name="John", last_name="Smith")
+
+        self.birth = Birth.objects.create(
+            person=self.person,
+            birth_date="2000-01-01",
+            birth_county=self.county,
+            birth_city=self.city,
+        )
+
+        self.death = Death.objects.create(
+            person=self.person,
+            death_date="2050-01-01",
+            death_county=self.county,
+            death_city=self.city,
+        )
+
+    def test_birth_admin_links_related_person(self):
+        url = reverse("admin:records_person_change", args=[self.person.id])
+        self.assertIn(str(self.person.id), url)
+
+    def test_death_admin_links_related_person(self):
+        url = reverse("admin:records_person_change", args=[self.person.id])
+        self.assertIn(str(self.person.id), url)
+
+
+class MarriageAdminTests(TestCase):
+    def setUp(self):
+        self.county = County.objects.create(county_code=1, county_name="TestCounty")
+        self.city = City.objects.create(county=self.county, city_name="TestCity")
+
+        self.p1 = Person.objects.create(first_name="A", last_name="Smith")
+        self.p2 = Person.objects.create(first_name="B", last_name="Jones")
+
+        self.marriage = Marriage.objects.create(
+            spouse1=self.p1,
+            spouse2=self.p2,
+            marriage_date="2020-01-01",
+            marriage_county=self.county,
+            marriage_city=self.city,
+        )
+
+    def test_marriage_links_spouses(self):
+        url1 = reverse("admin:records_person_change", args=[self.p1.id])
+        url2 = reverse("admin:records_person_change", args=[self.p2.id])
+
+        self.assertIn(str(self.p1.id), url1)
+        self.assertIn(str(self.p2.id), url2)
+
+
+class CommentAdminHTMLTests(TestCase):
+    def setUp(self):
+        self.person = Person.objects.create(first_name="John", last_name="Smith")
+
+        self.comment = Comment.objects.create(
+            person=self.person,
+            commenter_name="Test",
+            commenter_email="test@test.com",
+            comment_content="Hello",
+        )
+
+    def test_html_contains_htmx_attributes(self):
+        from records.admin import CommentAdmin
+
+        admin = CommentAdmin(Comment, None)
+
+        html = admin.build_std_link(self.comment, "click")
+
+        self.assertIn("hx-post", html)
+        self.assertIn("hx-trigger", html)
+        self.assertIn("click", html)
+
+
+class AddCommentTest(TestCase):
+    def setUp(self):
+        self.person = Person.objects.create(
+            first_name="John",
+            last_name="Smith",
+        )
+
+        self.valid_fields = {
+            "comment_content": "test comment",
+            "commenter_name": "Zack",
+            "commenter_email": "zack@example.com",
+        }
+
+    def test_comment_is_created(self):
+        add_comment(self.person, self.valid_fields)
+
+        self.assertEqual(Comment.objects.count(), 1)
+
+        comment = Comment.objects.first()
+        self.assertEqual(comment.person, self.person)
+        self.assertEqual(comment.comment_content, "test comment")
+
+    def test_whitespace_is_stripped(self):
+        fields = {
+            "comment_content": "   hello world   ",
+        }
+
+        add_comment(self.person, fields)
+
+        comment = Comment.objects.first()
+        self.assertEqual(comment.comment_content, "hello world")
+
+    def test_empty_comment_is_not_created(self):
+        fields = {
+            "comment_content": "     ",  # only whitespace
+        }
+
+        add_comment(self.person, fields)
+
+        self.assertEqual(Comment.objects.count(), 0)
+
+    def test_commenter_name_and_email_are_saved(self):
+        add_comment(self.person, self.valid_fields)
+
+        comment = Comment.objects.first()
+        self.assertEqual(comment.commenter_name, "Zack")
+        self.assertEqual(comment.commenter_email, "zack@example.com")
+
+    def test_missing_optional_fields(self):
+        fields = {
+            "comment_content": "hello",
+        }
+
+        add_comment(self.person, fields)
+
+        comment = Comment.objects.first()
+        self.assertEqual(comment.commenter_name, None)
+        self.assertEqual(comment.commenter_email, None)
+
+
+class ViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        self.person = Person.objects.create(first_name="John", last_name="Smith")
+
+    # -------------------------
+    # Record Details View
+    # -------------------------
+    def test_record_details_view(self):
+        url = reverse("record_details", args=[self.person.id])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "record_details.html")
+        self.assertIn("person", response.context)
+        self.assertEqual(response.context["person"], self.person)
+
+    # -------------------------
+    # Submit Comment View
+    # -------------------------
+    def test_submit_comment_creates_comment(self):
+        url = reverse("submit_comment", args=[self.person.id])
+
+        response = self.client.post(
+            url,
+            {
+                "comment_text": "Great record",
+                "commenter_name": "Zack",
+                "commenter_email": "zack@example.com",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Comment.objects.count(), 1)
+
+        comment = Comment.objects.first()
+        self.assertEqual(comment.person, self.person)
+        self.assertEqual(comment.comment_content, "Great record")
+        self.assertEqual(comment.commenter_name, "Zack")
+        self.assertEqual(comment.commenter_email, "zack@example.com")
+
+    def test_submit_comment_empty_does_not_create(self):
+        url = reverse("submit_comment", args=[self.person.id])
+
+        self.client.post(
+            url,
+            {
+                "comment_text": "   ",
+                "commenter_name": "Zack",
+                "commenter_email": "zack@example.com",
+            },
+        )
+
+        self.assertEqual(Comment.objects.count(), 0)
+
+    # -------------------------
+    # CSV Export View
+    # -------------------------
+    def test_csv_export(self):
+        url = reverse("export_csv", args=[self.person.id])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "text/csv")
+        self.assertIn(
+            f"{self.person.last_name}_{self.person.first_name}_record.csv",
+            response["Content-Disposition"],
+        )
+
+        content = response.content.decode()
+        self.assertIn("First Name", content)
+        self.assertIn("John", content)
+        self.assertIn("Smith", content)
+
+    # -------------------------
+    # PDF Export View
+    # -------------------------
+    def test_pdf_export(self):
+        url = reverse("export_pdf", args=[self.person.id])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        self.assertIn(
+            f"{self.person.last_name}_{self.person.first_name}_record.pdf",
+            response["Content-Disposition"],
+        )
+
+
+class HTMXSearchViewTests(TestCase):
+    """
+    Tests HTMX behavior for search views.
+    """
+
+    def setUp(self):
+        self.client = Client()
+
+    # -------------------------
+    # Birth Search (HTMX path)
+    # -------------------------
+    def test_birth_search_htmx_returns_results_template(self):
+        url = reverse("search_birth_records")
+
+        response = self.client.get(url, {"last_name": "Smith"}, HTTP_HX_REQUEST="true")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "birth_results.html")
+        self.assertIn("page_obj", response.context)
+
+    # -------------------------
+    # Birth Search (normal page load)
+    # -------------------------
+    def test_birth_search_normal_load(self):
+        url = reverse("search_birth_records")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "search_birth.html")
+
+    # -------------------------
+    # Death Search (HTMX path)
+    # -------------------------
+    def test_death_search_htmx_returns_results_template(self):
+        url = reverse("search_death_records")
+
+        response = self.client.get(url, {"last_name": "Smith"}, HTTP_HX_REQUEST="true")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "death_results.html")
+
+    # -------------------------
+    # Marriage Search (HTMX path)
+    # -------------------------
+    def test_marriage_search_htmx_returns_results_template(self):
+        url = reverse("search_marriage_records")
+
+        response = self.client.get(
+            url, {"husband_last_name": "Smith"}, HTTP_HX_REQUEST="true"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "marriage_results.html")
